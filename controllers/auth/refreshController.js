@@ -11,13 +11,13 @@ const refreshController = {
         });
 
         const { error } = refreshSchema.validate(req.body);
-
+        
         if (error) {
             return next(error);
         }
-
+        
         let refreshToken
-
+        
         try {
             refreshToken = await RefreshToken.findOne({ token: req.body.refreshToken})
             

@@ -1,4 +1,4 @@
-import { User } from "../../models";
+import { RefreshToken, User } from "../../models";
 import CustomErrorHandler from "../../services/CustomErrorHandler";
 import bcrypt from "bcrypt"
 import JwtService from "../../services/JwtService";
@@ -29,10 +29,11 @@ const loginController = {
                 return next(CustomErrorHandler.wrongCredentials());
             }
 
-            const access_token = JwtService.sign({ _id: user._id, role: user.role });
-            const refresh_token = JwtService.sign({ _id: user._id, role: user.role }, '1y', REFRESH_SECRET);
+            const accessToken = JwtService.sign({ _id: user._id, role: user.role });
+            const refreshToken = JwtService.sign({ _id: user._id, role: user.role }, '1y', REFRESH_SECRET);
 
-            res.json({ 'access_token': access_token, 'refreshToken': refresh_token })
+            await RefreshToken.create({ token: refreshToken });
+            res.json({ 'accessToken': accessToken, 'refreshToken': refreshToken })
         } catch(err) {
             return next(err);
         }
