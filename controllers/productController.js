@@ -3,6 +3,7 @@ import multer from "multer"
 import path from "path";
 import fs from "fs";
 import Joi from "joi";
+import CustomErrorHandler from "../services/CustomErrorHandler";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -118,6 +119,44 @@ const productController = {
             res.status(201).json(document);
         });
     },
+    async destroy(req, res, next) {
+        const document = await Product.findOneAndRemove({ _id: req.params.id });
+        
+        if (!document) {
+            return next(new Error('Nothing to delete'));
+        }
+        
+        const imagePath = document._doc.image;
+        
+        fs.unlink(`${appRoot}/${imagePath}`, (err) => {
+            if (err) {
+                return next(CustomErrorHandler.serverError());
+            }
+            return res.json(document);
+        });
+    },
+    async index(req, res, next) {
+        let documents;
+
+        try {
+            documents = await Product.find().select('-updatedAt -__v').sort({ _id: -1 });
+        } catch (err) {
+            return next(CustomErrorHandler.serverError())
+        }
+
+        return res.json(documents);
+    },
+    async show(req, res, next) {
+        let document;
+
+        try {
+            document = await Product.findOne({ _id: req.params.id }).select('-updatedAt -__v');
+        } catch (err) {
+            return next(CustomErrorHandler.serverError());
+        }
+        
+        return res.json(document);
+    }
 }
 
 export default productController

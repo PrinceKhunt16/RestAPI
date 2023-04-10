@@ -17,10 +17,11 @@ mongoose
   .catch(err => console.log('DB Connection Error', err))
 
 global.appRoot = path.resolve(__dirname)
+
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 app.use("/api", routes);
-
 app.use(errorHandler);
 
 app.listen(APP_PORT, () => {
